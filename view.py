@@ -1,7 +1,7 @@
-import re
 import tkinter as tk
 from tkinter import ttk
 from controller import Controller
+
 
 class View(ttk.Frame):
     def __init__(self, parent):
@@ -20,6 +20,11 @@ class View(ttk.Frame):
         # save button
         self.save_button = ttk.Button(self, text='Save', command=self.save_button_clicked)
         self.save_button.grid(row=1, column=3, padx=10)
+
+        # drop down
+        self.menu = tk.StringVar()
+        self.drop_down = ttk.OptionMenu(self, self.menu, '@gmail.com', '@hotmail.com', '.org.uk', '@highgateschool.org.uk')
+        self.drop_down.grid(row=2, column=3, padx=10)
 
         # message
         self.message_label = ttk.Label(self, text='', foreground='red')
@@ -42,10 +47,16 @@ class View(ttk.Frame):
         :return:
         """
         if self.controller:
+
             try:
-                Controller.save()
+                self.controller.save(str(self.email_var.get()) + str(self.menu.get()))
 
+                return self.show_success(f'The email {self.email_var.get()} saved!')
 
+            except ValueError:
+                # show an error message
+
+                self.show_error("Failure")
 
     def show_error(self, message):
         """
@@ -80,7 +91,6 @@ class View(ttk.Frame):
         self.message_label['text'] = ''
 
 
-
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -91,11 +101,8 @@ class App(tk.Tk):
         view = View(self)
         view.grid(row=0, column=0, padx=10, pady=10)
 
-        # create a controller
-        controller = Controller(model, view)
-
         # set the controller to view
-        view.set_controller(controller)
+        view.set_controller(Controller())
 
 
 if __name__ == '__main__':
